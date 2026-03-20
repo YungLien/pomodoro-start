@@ -10,21 +10,25 @@ FONT_NAME = "Courier"
 WORK_MIN = 1
 SHORT_BREAK_MIN = 5
 LONG_BREAK_MIN = 20
-time = None
+time_countdown = None
 reps = 0
 
 # ---------------------------- TIMER RESET ------------------------------- # 
 def timer_reset():
-    window.after_cancel(time)
+    global reps, time_countdown
+    if time_countdown is not None:
+        window.after_cancel(time_countdown)
+        time_countdown = None
     canvas.itemconfig(timer_text, text="00:00")
     timer.config(text="Timer", fg=GREEN)
     check_mark.config(text="")
-    global reps
     reps = 0
 
 # ---------------------------- TIMER MECHANISM ------------------------------- # 
 def start_timer():
-    global reps
+    global reps, time_countdown
+    if time_countdown is not None:
+        return
     reps += 1
     work_sec = WORK_MIN * 60
     short_break_sec = SHORT_BREAK_MIN * 60
@@ -43,6 +47,7 @@ def start_timer():
 
 # ---------------------------- COUNTDOWN MECHANISM ------------------------------- # 
 def countdown(count):
+    global time_countdown
     count_min = math.floor(count / 60)
     count_sec = count % 60
     # dynamic typing
@@ -51,9 +56,9 @@ def countdown(count):
 
     canvas.itemconfig(timer_text, text=f"{count_min}:{count_sec}")
     if count > 0:
-        global time
-        time = window.after(1000, countdown, count - 1)
+        time_countdown = window.after(1000, countdown, count - 1)
     else:
+        time_countdown = None
         start_timer()
         marks = ""
         work_sessions = math.floor(reps/2)
